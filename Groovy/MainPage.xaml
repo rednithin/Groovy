@@ -8,13 +8,16 @@
     mc:Ignorable="d" Loaded="Page_Loaded"
     >
 
-    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <SplitView x:Name="mySplitView">
             <SplitView.Pane>
                 <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                     <RelativePanel>
                         <Button RelativePanel.AlignLeftWithPanel="True" 
                                 Content="&#xE700;" 
+                                Height="35"
+                                Width="45"
+                                Padding="5"
                                 FontFamily="Segoe MDL2 Assets"
                                 Click="Hamburger_Button_Click"/>
                     </RelativePanel>
@@ -22,16 +25,114 @@
             </SplitView.Pane>
             
             <SplitView.Content>
-                <StackPanel>
-                    <RelativePanel>
-                        <Button RelativePanel.AlignLeftWithPanel="True" 
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
                                 Content="&#xE700;"
+                                Height="35"
+                                Width="45"
+                                Padding="5"
                                 FontFamily="Segoe MDL2 Assets"
                                 Click="Hamburger_Button_Click"/>
-                        
-                    </RelativePanel>
-                </StackPanel>
+                        <TextBox x:Name="searchTextBox"
+                                 Grid.Column="1"
+                                 PlaceholderText="Enter song title to retrieve tags."
+                                 Margin="10,1,0,0"
+                                 FontSize="18"
+                                 Height="34"
+                                 BorderThickness="1" KeyDown="searchTextBox_KeyDown"
+                                 />
+                        <Button x:Name="searchButton"
+                                Grid.Column="2"
+                                Content="&#xE721;"
+                                Height="35"
+                                Width="45"
+                                Padding="5"
+                                FontFamily="Segoe MDL2 Assets"
+                                Click="searchButton_Click"/>
+                    </Grid>
+                    <ProgressBar x:Name="myProgressBar"
+                                 Grid.Row="1"
+                                 Height="5"/>
+                    <GridView x:Name="tracksGridView"
+                              Grid.Row="2"
+                              ItemsSource="{x:Bind tracksCollection}" 
+                              Margin="0,5,0,0">
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="local:Track">
+                                <StackPanel Orientation="Vertical"
+                                            Width="270"
+                                            Padding="10"
+                                            BorderBrush="{ThemeResource AppBarBackground}"
+                                            BorderThickness="2">                                    
+                                    <TextBlock Text="{x:Bind Name}"
+                                               FontSize="30"
+                                               FontWeight="SemiLight"
+                                               TextTrimming="CharacterEllipsis"
+                                               Padding="5"/>
+                                    <TextBlock Text="{x:Bind Album}"
+                                               FontSize="25"
+                                               FontWeight="Normal"
+                                               TextTrimming="CharacterEllipsis"
+                                               Padding="5"/>
+                                    <TextBlock Text="{x:Bind AlbumArtist}" 
+                                               FontSize="20"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               Padding="5"/>
+                                    <Image Source="{x:Bind ImageURLShort}"
+                                           Width="255"
+                                           Height="260"
+                                           Margin="5"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                    <Grid Grid.Row="3"
+                          Padding="0,2,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/> 
+                            
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="File Path :"
+                                   FontSize="18"
+                                   Margin="5,0"/>
+                        <TextBlock x:Name="fileNameTextBlock" 
+                                   Text="{x:Bind filepath}"
+                                   Grid.Column="1"
+                                   FontSize="18"
+                                   Margin="5,0"/>
+                        <Button x:Name="pickFileButton"
+                                Content="&#xE8DA;"
+                                Height="35"
+                                Width="45"
+                                Padding="5"
+                                FontFamily="Segoe MDL2 Assets"
+                                Grid.Column="2" Click="pickFileButton_Click"/>
+                        <Button x:Name="saveButton"
+                                Content="&#xE74E;"
+                                Height="35"
+                                Width="45"
+                                Padding="5"
+                                FontFamily="Segoe MDL2 Assets"
+                                Grid.Column="3" Click="saveButton_Click"/>
+                    </Grid>
+                </Grid>
             </SplitView.Content>
         </SplitView>
-    </StackPanel>
+    </Grid>
 </Page>

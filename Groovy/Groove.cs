@@ -17,8 +17,9 @@ namespace Groovy
         public int TrackNumber { get; set; }
         public string Album { get; set; }
         public string AlbumArtist { get; set; }
-        public List<string> Genres = new List<string>();
+        public List<string> Genres { get; set; } = new List<string>();
         public string ImageURL { get; set; }
+        public string ImageURLShort { get; set; }
         public int Year { get; set; }
 
         public Track(Item item)
@@ -36,6 +37,7 @@ namespace Groovy
                 Genres.Add(genre);
             }
             ImageURL = item.ImageUrl;
+            ImageURLShort = ImageURL + "&w=250&h=250";
             Year = Int32.Parse(item.ReleaseDate.Substring(0,4));
         }
     }
@@ -107,10 +109,16 @@ namespace Groovy
 
     class Groove
     {
-        
-
-        public static async Task<List<Track>> Go()
+        public static string QuotePlus(string searchKey)
         {
+            searchKey = searchKey.Trim();
+            searchKey = searchKey.Replace(' ', '+');
+            return searchKey;
+        }
+
+        public static async Task<List<Track>> Go(string searchKey)
+        {
+
             var client = new HttpClient();
 
             // Define the data needed to request an authorization token.
@@ -133,7 +141,7 @@ namespace Groovy
             var token = Regex.Match(responseString, ".*\"access_token\":\"(.*?)\".*", RegexOptions.IgnoreCase).Groups[1].Value;
 
             // Use the token in a new request.
-            var request = (HttpWebRequest)WebRequest.Create("https://music.xboxlive.com/1/content/music/search?q=" + "daft+punk" + "&filters=Tracks");
+            var request = (HttpWebRequest)WebRequest.Create("https://music.xboxlive.com/1/content/music/search?q=" + QuotePlus(searchKey) + "&filters=Tracks");
             request.Accept = "application/json";
             request.Headers["Authorization"] = "Bearer " + token;
 
