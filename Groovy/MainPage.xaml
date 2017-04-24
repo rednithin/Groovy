@@ -9,19 +9,127 @@
     >
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <SplitView x:Name="mySplitView">
+        <SplitView x:Name="mySplitView"
+                   OpenPaneLength="200">
             <SplitView.Pane>
-                <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                    <RelativePanel>
-                        <Button RelativePanel.AlignLeftWithPanel="True" 
+                <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
                                 Content="&#xE700;" 
                                 Height="35"
                                 Width="45"
                                 Padding="5"
                                 FontFamily="Segoe MDL2 Assets"
                                 Click="Hamburger_Button_Click"/>
+                        <TextBlock Grid.Column="1"
+                                   FontWeight="Bold"
+                                   FontSize="18"
+                                   Height="35"
+                                   Padding="0,6,0,0"
+                                   Text="G R O O V Y"
+                                   HorizontalAlignment="Center"/>
+                    </Grid>
+                    <RelativePanel Grid.Row="1">
+                        <ListView x:Name="myListView"
+                                  RelativePanel.AlignBottomWithPanel="True"
+                                  Width="200"
+                                  SelectionChanged="ListView_SelectionChanged">
+                            <ListViewItem>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="&#xE00A;" 
+                                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                            Height="35"
+                                            Width="45"
+                                            Padding="5"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            IsEnabled="False"
+                                            />
+                                    <TextBlock Grid.Column="1"
+                                               Margin="10,1,0,0"
+                                               FontSize="18"
+                                               Height="35"
+                                               Padding="0,5,0,0"
+                                               Text="Rate My App"/>
+                                </Grid>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="&#xE8D7;" 
+                                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                            Height="35"
+                                            Width="45"
+                                            Padding="5"
+                                            IsEnabled="False"
+                                            FontFamily="Segoe MDL2 Assets"/>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="10,1,0,0"
+                                               FontSize="18"
+                                               Height="35"
+                                               Padding="0,5,0,0"
+                                               Text="Privacy Policy"/>
+                                </Grid>                                   
+                            </ListViewItem>
+                            <ListViewItem>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="&#xE8E1;" 
+                                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                            Height="35"
+                                            Width="45"
+                                            Padding="5"
+                                            IsEnabled="False"
+                                            FontFamily="Segoe MDL2 Assets"/>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="10,1,0,0"
+                                               FontSize="18"
+                                               Height="35"
+                                               Padding="0,5,0,0"
+                                               Text="Github Repo"/>
+                                </Grid>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="&#xE715;" 
+                                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                            Height="35"
+                                            Width="45"
+                                            Padding="5"
+                                            IsEnabled="False"
+                                            FontFamily="Segoe MDL2 Assets"/>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="10,1,0,0"
+                                               FontSize="18"
+                                               Height="35"
+                                               Padding="0,5,0,0"
+                                               Text="Contact Dev"/>
+                                </Grid>
+                            </ListViewItem>
+                        </ListView>
                     </RelativePanel>
-                </StackPanel>
+                </Grid>
             </SplitView.Pane>
             
             <SplitView.Content>
@@ -64,7 +172,9 @@
                     </Grid>
                     <ProgressBar x:Name="myProgressBar"
                                  Grid.Row="1"
-                                 Height="5"/>
+                                 Height="5"
+                                 Background="White"
+                                 />
                     <GridView x:Name="tracksGridView"
                               Grid.Row="2"
                               ItemsSource="{x:Bind tracksCollection}" 
@@ -88,6 +198,11 @@
                                                Padding="5"/>
                                     <TextBlock Text="{x:Bind AlbumArtist}" 
                                                FontSize="20"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               Padding="5"/>
+                                    <TextBlock Text="Source: Groove Music" 
+                                               FontSize="15"
                                                FontWeight="SemiBold"
                                                TextTrimming="CharacterEllipsis"
                                                Padding="5"/>

@@ -4,12 +4,17 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using TagLib;
+using Windows.ApplicationModel.Email;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Globalization;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.System;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -65,7 +70,7 @@ namespace Groovy
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            ProgressBarStop();          
+            ProgressBarStop();
 
 
             /*
@@ -75,7 +80,7 @@ namespace Groovy
             var file = await filePicker.PickSingleFileAsync();
             await Windows.Storage.FileIO.WriteTextAsync(file, myString);
             */
-            
+
         }
 
         private async void ShowDialog(String message)
@@ -108,22 +113,32 @@ namespace Groovy
 
         private async void searchButton_Click(object sender, RoutedEventArgs e)
         {
-            if(searchTextBox.Text == "")
+            ProgressBarStart();
+            try
             {
-                return;
+                tracksCollection.Clear();
+                if (searchTextBox.Text == "")
+                {
+                    return;
+                }
+                var searchText = searchTextBox.Text;
+                searchTextBox.Text = "";
+                var tracks = new ObservableCollection<Track>(await Groove.Go(searchText));
+                foreach (var track in tracks)
+                {
+                    tracksCollection.Add(track);
+                }
             }
-            var searchText = searchTextBox.Text;
-            searchTextBox.Text = "";
-            var tracks = new ObservableCollection<Track>(await Groove.Go(searchText));
-            foreach(var track in tracks)
+            catch (Exception exception)
             {
-                tracksCollection.Add(track);
+                ShowDialog("Cannot connect to the internet. Please try again.");
             }
+            ProgressBarStop();
         }
 
         private void searchTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
-            if(e.Key == Windows.System.VirtualKey.Enter)
+            if (e.Key == Windows.System.VirtualKey.Enter)
             {
                 searchButton_Click(searchButton, e);
             }
@@ -131,55 +146,143 @@ namespace Groovy
 
         private async void pickFileButton_Click(object sender, RoutedEventArgs e)
         {
-            var filePicker = new FileOpenPicker()
+            try
             {
-                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.MusicLibrary
-            };
-            filePicker.FileTypeFilter.Add(".mp3");
-            filePicker.FileTypeFilter.Add(".m4a");
-            filePicker.FileTypeFilter.Add(".aac");
-            filePicker.FileTypeFilter.Add(".flac");
-            file = await filePicker.PickSingleFileAsync();
-            fileNameTextBlock.Text = file.Path;
-            filepath = file.Path;
+                var filePicker = new FileOpenPicker()
+                {
+                    SuggestedStartLocation = PickerLocationId.MusicLibrary
+                };
+                filePicker.FileTypeFilter.Add(".mp3");
+                filePicker.FileTypeFilter.Add(".m4a");
+                filePicker.FileTypeFilter.Add(".aac");
+                filePicker.FileTypeFilter.Add(".flac");
+                file = await filePicker.PickSingleFileAsync();
+                fileNameTextBlock.Text = file.Path;
+                filepath = file.Path;
+            }
+            catch (Exception exception)
+            {
+                ShowDialog("Error in picking file. Try storing the file in music directory of your phone."
+                    + "\nThen try again.");
+            }
+
+        }
+
+        private async Task<byte[]> GetImageFromUrl(string url)
+        {
+            ProgressBarStart();
+            try
+            {
+                byte[] b = null;
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                var response = (HttpWebResponse)(await request.GetResponseAsync());
+
+                if (request.HaveResponse)
+                {
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        Stream receiveStream = response.GetResponseStream();
+                        using (var br = new BinaryReader(receiveStream))
+                        {
+                            b = br.ReadBytes(int.MaxValue / 2);
+                        }
+                    }
+                }
+                ProgressBarStop();
+                return b;
+            }
+            catch (Exception exception)
+            {
+                ShowDialog("Couldn't download image from the internet. Please try again.");
+                ProgressBarStop();
+            }            
+            return null;
         }
 
         private async void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            if(file == null)
+            ProgressBarStart();
+            try
+            {
+                if (file == null)
+                {
+                    ShowDialog("Pick a file first to save tags to. NOTE: Song should be in the music directory.");
+                    return;
+                }
+
+                int index = tracksGridView.SelectedIndex;
+                if (index == -1)
+                {
+                    ShowDialog("Search for song tags using the search box above. " +
+                        "\nThen select the appropriate tags and pick a music file and try again.");
+                    return;
+                }
+                var track = tracksCollection[index];
+
+                var musicfile = await StorageFile.GetFileFromPathAsync(filepath);
+                var simpleFileAbstraction = new FileAbstraction(musicfile.Name, await musicfile.OpenStreamForWriteAsync());
+                using (var tagFile = Create(simpleFileAbstraction))
+                {
+
+                    tagFile.Tag.Clear();
+                    tagFile.Tag.Album = track.Album;
+                    tagFile.Tag.AlbumArtists = track.Artists.ToArray();
+                    tagFile.Tag.Performers = track.Artists.ToArray();
+                    tagFile.Tag.Title = track.Name;
+                    tagFile.Tag.Track = (uint)track.TrackNumber;
+                    tagFile.Tag.TrackCount = (uint)track.TrackNumber;
+                    tagFile.Tag.Year = (uint)track.Year;
+                    tagFile.Tag.Genres = track.Genres.ToArray();
+                    IPicture newArt = new Picture(await GetImageFromUrl(track.ImageURL));
+                    tagFile.Tag.Pictures = new IPicture[1] { newArt };
+
+                    //track.ImageURL;
+                    tagFile.Save();
+                }
+                simpleFileAbstraction.CloseStream(simpleFileAbstraction.ReadStream);
+                filepath = "";
+                file = null;
+                ShowDialog("Tags and Album Art Save Successful");
+            }
+            catch (Exception exception)
+            {
+                ShowDialog("Error in saving tags to the file. Please try again.");
+                ProgressBarStop();
+            }
+            ProgressBarStop();
+        }
+
+        private async void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var index = myListView.SelectedIndex;
+            if (index < 0)
             {
                 return;
             }
-            
-            int index = tracksGridView.SelectedIndex;
-            if (index == -1)
+            myListView.SelectedIndex = -1;
+            if (index == 0)
             {
-                return;
+                await Launcher.LaunchUriAsync(new Uri(string.Format("ms-windows-store:REVIEW?PFN={0}", Windows.ApplicationModel.Package.Current.Id.FamilyName)));
             }
-            var track = tracksCollection[index];
-
-            var musicfile = await StorageFile.GetFileFromPathAsync(filepath);
-            var simpleFileAbstraction = new FileAbstraction(musicfile.Name, await musicfile.OpenStreamForWriteAsync());
-            using (var tagFile = TagLib.File.Create(simpleFileAbstraction))
+            else if (index == 1)
             {
-
-                tagFile.Tag.Clear();
-                tagFile.Tag.Album = track.Album;
-                tagFile.Tag.AlbumArtists = track.Artists.ToArray();
-                tagFile.Tag.Performers = track.Artists.ToArray();
-                tagFile.Tag.Title = track.Name;
-                tagFile.Tag.Track = (uint)track.TrackNumber;
-                tagFile.Tag.TrackCount = (uint)track.TrackNumber;
-                tagFile.Tag.Year = (uint)track.Year;
-                tagFile.Tag.Genres = track.Genres.ToArray();
-
-
-                //track.ImageURL;
-                tagFile.Save();
+                string url = @"http://myapppolicy.com/app/groovyuwp";
+                var uri = new Uri(url);
+                await Windows.System.Launcher.LaunchUriAsync(uri);
             }
-            
-            filepath = "";
-            file = null;
+            else if (index == 2)
+            {
+                string url = @"https://github.com/rednithin/Groovy";
+                var uri = new Uri(url);
+                await Windows.System.Launcher.LaunchUriAsync(uri);
+            }
+            else if (index == 3)
+            {
+                var emailMessage = new EmailMessage();
+                emailMessage.To.Add(new EmailRecipient("reddy.nithinpg@gmail.com"));
+                emailMessage.Subject = "Groovy UWP";
+                await EmailManager.ShowComposeNewEmailAsync(emailMessage);
+            }
         }
     }
 }

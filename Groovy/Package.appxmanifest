@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="8c87b315-ccb1-4b60-bb81-10d7ecce03ac" Publisher="CN=reddy" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="8c87b315-ccb1-4b60-bb81-10d7ecce03ac" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="35215RedNithin.GroovyUWP" Publisher="CN=D1C694F8-F891-444C-BB9A-4989E299B4A0" Version="3.0.4.0" />
+  <mp:PhoneIdentity PhoneProductId="7990972a-3c77-4063-8f6b-84fbfa6a14ea" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>Groovy</DisplayName>
-    <PublisherDisplayName>reddy</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+    <DisplayName>Groovy UWP</DisplayName>
+    <PublisherDisplayName>RedNithin</PublisherDisplayName>
+    <Logo>Assets\Example.png</Logo>
   </Properties>
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
@@ -15,8 +15,11 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Groovy.App">
-      <uap:VisualElements DisplayName="Groovy" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Groovy" BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+      <uap:VisualElements DisplayName="Groovy UWP" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Groovy" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Groovy">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
